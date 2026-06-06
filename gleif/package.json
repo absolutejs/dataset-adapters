@@ -20,6 +20,9 @@
     "lei",
     "company-data"
   ],
+  "bin": {
+    "gleif-snapshot": "./dist/snapshot.js"
+  },
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "name": "@absolutejs/dataset-gleif",
@@ -35,11 +38,11 @@
     "url": "https://github.com/absolutejs/dataset-adapters.git"
   },
   "scripts": {
-    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=bun --external @absolutejs/discover && tsc --emitDeclarationOnly --project tsconfig.json",
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=bun --external @absolutejs/discover && bun build scripts/snapshot.ts --outdir dist --target=bun --external @absolutejs/discover && tsc --emitDeclarationOnly --project tsconfig.json",
     "release": "bun run build && bun publish",
     "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.0.2"
+  "version": "0.0.3"
 }

@@ -4,6 +4,21 @@ const GLEIF_API = "https://api.gleif.org/api/v1";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_PAGE_SIZE = 10;
 
+// Shared name normalizer — used both to BUILD the snapshot's lookup key and to
+// QUERY it, so the two always agree. Lowercases, strips punctuation + common
+// legal suffixes, collapses whitespace ("Stripe, Inc." → "stripe").
+export const normalizeCompanyName = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^\p{L}\p{N} ]/gu, " ")
+    .replace(
+      /\b(inc|incorporated|corp|corporation|llc|llp|lp|ltd|limited|co|company|gmbh|ag|sa|bv|nv|plc|holding|holdings|group|the)\b/g,
+      " ",
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+
 type GleifEntity = {
   legalName?: { name?: string };
   legalAddress?: { country?: string };
@@ -11,6 +26,32 @@ type GleifEntity = {
 };
 type GleifRecord = { attributes?: { lei?: string; entity?: GleifEntity } };
 type GleifResponse = { data?: GleifRecord[] };
+
+// Snapshot (SQLite) read path — opened lazily + once per file, read-only.
+type SnapshotRow = {
+  lei: string;
+  name: string;
+  country: string | null;
+  status: string | null;
+};
+const snapshotLookups = new Map<
+  string,
+  (norm: string) => SnapshotRow | null
+>();
+
+const getSnapshotLookup = async (path: string) => {
+  const existing = snapshotLookups.get(path);
+  if (existing) return existing;
+  const { Database } = await import("bun:sqlite");
+  const db = new Database(path, { readonly: true });
+  const statement = db.query<SnapshotRow, [string]>(
+    "SELECT lei, name, country, status FROM company WHERE norm_name = ?1 ORDER BY CASE status WHEN 'ACTIVE' THEN 0 ELSE 1 END LIMIT 1",
+  );
+  const lookup = (norm: string) => statement.get(norm);
+  snapshotLookups.set(path, lookup);
+
+  return lookup;
+};
 
 const toCompany = (record: GleifRecord): NormalizedCompany | null => {
   const entity = record.attributes?.entity;
@@ -31,6 +72,10 @@ export type GleifOptions = {
   timeoutMs?: number;
   /** Only consider ACTIVE legal entities (default true). */
   activeOnly?: boolean;
+  /** Path to a SQLite snapshot built by the snapshot generator (see scripts/).
+   *  When set, findCompany resolves from it first — instant, offline, no rate
+   *  limit — and falls back to the live API only on a miss. */
+  snapshotPath?: string;
 };
 
 // GLEIF (Global Legal Entity Identifier Foundation) — a `@absolutejs/discover`
@@ -50,6 +95,26 @@ export const gleifSource = (options: GleifOptions = {}): DatasetSource => {
   }) => {
     const query = name?.trim();
     if (!query) return null;
+
+    // 1. Local snapshot first (instant, offline). Miss → fall to the live API.
+    if (options.snapshotPath) {
+      try {
+        const lookup = await getSnapshotLookup(options.snapshotPath);
+        const row = lookup(normalizeCompanyName(query));
+        if (row) {
+          return {
+            country: row.country ?? undefined,
+            name: row.name,
+            registryId: row.lei,
+            source: "gleif",
+          };
+        }
+      } catch {
+        // snapshot unreadable → fall through to the live API
+      }
+    }
+
+    // 2. Live GLEIF API.
     const params = new URLSearchParams();
     params.set("filter[fulltext]", query);
     params.set("page[size]", String(DEFAULT_PAGE_SIZE));
