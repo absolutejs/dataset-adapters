@@ -7,6 +7,18 @@
     },
     "gleif": {
       "name": "@absolutejs/dataset-gleif",
+      "version": "0.0.2",
+      "devDependencies": {
+        "@absolutejs/discover": "^0.0.3",
+        "@types/bun": "latest",
+        "typescript": "5.8.3",
+      },
+      "peerDependencies": {
+        "@absolutejs/discover": ">=0.0.3",
+      },
+    },
+    "sec-edgar": {
+      "name": "@absolutejs/dataset-sec-edgar",
       "version": "0.0.1",
       "devDependencies": {
         "@absolutejs/discover": "^0.0.3",
@@ -20,6 +32,8 @@
   },
   "packages": {
     "@absolutejs/dataset-gleif": ["@absolutejs/dataset-gleif@workspace:gleif"],
+
+    "@absolutejs/dataset-sec-edgar": ["@absolutejs/dataset-sec-edgar@workspace:sec-edgar"],
 
     "@absolutejs/discover": ["@absolutejs/discover@0.0.3", "", {}, "sha512-9ihuda8y6UIwvF9MOQJplDNLeZe0klfqVl97iA7g8hhc8s/F4ULnxTzSYKwPGfZuRXz4UMQbrYPpa9AX6dH+jQ=="],
 

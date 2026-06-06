@@ -1,6 +1,6 @@
 {
   "author": "Alex Kahn",
-  "description": "GLEIF (Global LEI) DatasetSource adapter for @absolutejs/discover — resolve a company to its official legal entity (LEI, jurisdiction, country) from open CC0 registry data.",
+  "description": "SEC EDGAR DatasetSource adapter for @absolutejs/discover — resolve a US public company (CIK) and its insiders (officers/directors via Form 3/4/5) from public-domain U.S. government filings.",
   "devDependencies": {
     "@absolutejs/discover": "^0.0.3",
     "@types/bun": "latest",
@@ -16,13 +16,13 @@
     "absolutejs",
     "discover",
     "dataset",
-    "gleif",
-    "lei",
+    "sec",
+    "edgar",
     "company-data"
   ],
   "license": "Apache-2.0",
   "main": "./dist/index.js",
-  "name": "@absolutejs/dataset-gleif",
+  "name": "@absolutejs/dataset-sec-edgar",
   "peerDependencies": {
     "@absolutejs/discover": ">=0.0.3"
   },
@@ -30,7 +30,7 @@
     "access": "public"
   },
   "repository": {
-    "directory": "gleif",
+    "directory": "sec-edgar",
     "type": "git",
     "url": "https://github.com/absolutejs/dataset-adapters.git"
   },
@@ -41,5 +41,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.0.2"
+  "version": "0.0.1"
 }

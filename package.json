@@ -9,6 +9,7 @@
     "url": "https://github.com/absolutejs/dataset-adapters.git"
   },
   "workspaces": [
-    "gleif"
+    "gleif",
+    "sec-edgar"
   ]
 }
