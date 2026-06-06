@@ -1,0 +1,14 @@
+{
+  "author": "Alex Kahn",
+  "description": "Monorepo root for @absolutejs/discover dataset adapters — open-data sources (GLEIF, SEC EDGAR, GitHub, …) normalized to the DatasetSource contract. Subpackages live in ./<name>/ and publish independently as @absolutejs/dataset-<name>.",
+  "license": "Apache-2.0",
+  "name": "dataset-adapters",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/absolutejs/dataset-adapters.git"
+  },
+  "workspaces": [
+    "gleif"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "author": "Alex Kahn",
+  "description": "GLEIF (Global LEI) DatasetSource adapter for @absolutejs/discover — resolve a company to its official legal entity (LEI, jurisdiction, country) from open CC0 registry data.",
+  "devDependencies": {
+    "@absolutejs/discover": "^0.0.3",
+    "@types/bun": "latest",
+    "typescript": "5.8.3"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "absolutejs",
+    "discover",
+    "dataset",
+    "gleif",
+    "lei",
+    "company-data"
+  ],
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "name": "@absolutejs/dataset-gleif",
+  "peerDependencies": {
+    "@absolutejs/discover": ">=0.0.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "directory": "gleif",
+    "type": "git",
+    "url": "https://github.com/absolutejs/dataset-adapters.git"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=bun --external @absolutejs/discover && tsc --emitDeclarationOnly --project tsconfig.json",
+    "release": "bun run build && bun publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "0.0.1"
+}
