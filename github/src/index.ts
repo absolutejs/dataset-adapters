@@ -4,12 +4,18 @@ const API = "https://api.github.com";
 const DEFAULT_UA = "AbsoluteJS-dataset-github";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_MEMBERS = 15;
-const LEADER_CONFIDENCE = 65;
+const LEADER_CONFIDENCE = 65; // current leader at this company
+const OPERATOR_CONFIDENCE = 50; // proven operator (past founder/exec), now an IC
 
-// Leadership / decision-maker signals in a GitHub bio. We surface only members
-// whose bio matches — founders/execs/leads — not every engineer.
+// Leadership / decision-maker signals in the CURRENT part of a bio → a current
+// role at this company.
 const LEADERSHIP_RE =
   /\b(co-?founders?|founders?|ceo|cto|coo|cfo|cmo|chief\s+\w+\s+officer|president|vice\s+president|vp\b|head\s+of\s+[a-z ]+|director\s+of\s+[a-z ]+|partnerships?|business\s+development)\b/i;
+
+// Track-record signals ANYWHERE in a bio — a founder/exec history or an exit.
+// A proven operator is worth reaching even if they're currently an IC.
+const BACKGROUND_RE =
+  /\b(co-?founders?|founders?|ceo|cto|coo|cfo|chief\s+\w+\s+officer|exited?|acquired|ipo)\b/i;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -165,33 +171,51 @@ export const githubSource = (options: GithubOptions = {}): DatasetSource => {
         })
       : [];
 
-    const profiles = await Promise.all(
-      memberLogins.map(async (memberLogin): Promise<NormalizedPerson | null> => {
-        const user = await getJson(`/users/${encodeURIComponent(memberLogin)}`);
-        if (!isRecord(user)) return null;
-        const bio = asString(user["bio"]) ?? "";
-        // Only the CURRENT part of the bio — drop anything after a "before /
-        // previously / ex-" marker so a PAST founder/exec role at another company
-        // doesn't get mislabeled as their role here.
-        const currentBio =
-          bio.split(/\b(?:before|previously|formerly|prev|ex[-\s])/i)[0] ?? bio;
-        const leadership = currentBio.match(LEADERSHIP_RE);
-        if (!leadership) return null; // decision-makers only, not every engineer
+    const buildPerson = async (
+      memberLogin: string,
+    ): Promise<NormalizedPerson | null> => {
+      const user = await getJson(`/users/${encodeURIComponent(memberLogin)}`);
+      if (!isRecord(user)) return null;
+      const bio = asString(user["bio"]) ?? "";
+      // CURRENT role = leadership signal BEFORE any "before/previously/ex-"
+      // marker, so a past role elsewhere isn't mislabeled as their title here.
+      const currentBio =
+        bio.split(/\b(?:before|previously|formerly|prev|ex[-\s])/i)[0] ?? bio;
+      const currentRole = currentBio.match(LEADERSHIP_RE);
+      // Notable track record = a founder/exec/exit signal ANYWHERE in the bio.
+      const notableBackground = BACKGROUND_RE.test(bio);
+      // Keep current leaders AND proven operators (past founders/execs) — both
+      // are valuable contacts. Skip plain engineers.
+      if (!currentRole && !notableBackground) return null;
 
-        return {
-          company: orgName,
-          confidence: LEADER_CONFIDENCE,
-          email: asString(user["email"]),
-          fullName: asString(user["name"]) ?? memberLogin,
-          source: "github",
-          title: leadership[0],
-        };
-      }),
-    );
+      return {
+        // The full bio carries the track record (past ventures/exits).
+        background: notableBackground ? bio : undefined,
+        company: orgName,
+        confidence: currentRole ? LEADER_CONFIDENCE : OPERATOR_CONFIDENCE,
+        email: asString(user["email"]),
+        fullName: asString(user["name"]) ?? memberLogin,
+        source: "github",
+        title: currentRole ? currentRole[0] : undefined,
+      };
+    };
 
-    const people = profiles.flatMap((person) => (person ? [person] : []));
+    // Fetch profiles SEQUENTIALLY (recurse, no await-in-loop) — a parallel burst
+    // trips GitHub's secondary rate limit and 403s the lot. Stop early once we
+    // have `limit` qualifying people.
+    const target = query.limit ?? memberLogins.length;
+    const scan = async (
+      remaining: string[],
+      collected: NormalizedPerson[],
+    ): Promise<NormalizedPerson[]> => {
+      const [head, ...rest] = remaining;
+      if (!head || collected.length >= target) return collected;
+      const person = await buildPerson(head);
 
-    return query.limit ? people.slice(0, query.limit) : people;
+      return scan(rest, person ? [...collected, person] : collected);
+    };
+
+    return scan(memberLogins, []);
   };
 
   return { findCompany, findPeople, name: "github" };

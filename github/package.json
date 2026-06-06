@@ -2,7 +2,7 @@
   "author": "Alex Kahn",
   "description": "GitHub DatasetSource adapter for @absolutejs/discover — resolve a company's GitHub org and surface its public members (founders/leads, occasionally a public email) for tech-company contact discovery.",
   "devDependencies": {
-    "@absolutejs/discover": "^0.0.5",
+    "@absolutejs/discover": "^0.0.6",
     "@types/bun": "latest",
     "typescript": "5.8.3"
   },
@@ -23,7 +23,7 @@
   "main": "./dist/index.js",
   "name": "@absolutejs/dataset-github",
   "peerDependencies": {
-    "@absolutejs/discover": ">=0.0.5"
+    "@absolutejs/discover": ">=0.0.6"
   },
   "publishConfig": {
     "access": "public"
@@ -40,5 +40,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.0.1"
+  "version": "0.0.2"
 }

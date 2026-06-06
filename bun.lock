@@ -7,14 +7,14 @@
     },
     "github": {
       "name": "@absolutejs/dataset-github",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "devDependencies": {
-        "@absolutejs/discover": "^0.0.5",
+        "@absolutejs/discover": "^0.0.6",
         "@types/bun": "latest",
         "typescript": "5.8.3",
       },
       "peerDependencies": {
-        "@absolutejs/discover": ">=0.0.5",
+        "@absolutejs/discover": ">=0.0.6",
       },
     },
     "gleif": {
@@ -49,7 +49,7 @@
 
     "@absolutejs/dataset-sec-edgar": ["@absolutejs/dataset-sec-edgar@workspace:sec-edgar"],
 
-    "@absolutejs/discover": ["@absolutejs/discover@0.0.5", "", {}, "sha512-IbZxxHJCCnMfNI9LT1N3TyKCT+ll0cmOpbShL+Jgn9A3DNziUx/G4WLdA8p+Guk+8+rg3kcYopgqBykuNu52RQ=="],
+    "@absolutejs/discover": ["@absolutejs/discover@0.0.6", "", {}, "sha512-+6DzVBgcNWMP7jUYUqo18mCd/9DnF22l3c5e1dVCfYo7aA9dHl70exE3GbjZu9TF17vkzlIaLKGPqcLX+rApbA=="],
 
     "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
 
