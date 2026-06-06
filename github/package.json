@@ -1,0 +1,44 @@
+{
+  "author": "Alex Kahn",
+  "description": "GitHub DatasetSource adapter for @absolutejs/discover — resolve a company's GitHub org and surface its public members (founders/leads, occasionally a public email) for tech-company contact discovery.",
+  "devDependencies": {
+    "@absolutejs/discover": "^0.0.5",
+    "@types/bun": "latest",
+    "typescript": "5.8.3"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "keywords": [
+    "absolutejs",
+    "discover",
+    "dataset",
+    "github",
+    "company-data"
+  ],
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "name": "@absolutejs/dataset-github",
+  "peerDependencies": {
+    "@absolutejs/discover": ">=0.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "directory": "github",
+    "type": "git",
+    "url": "https://github.com/absolutejs/dataset-adapters.git"
+  },
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --target=bun --external @absolutejs/discover && tsc --emitDeclarationOnly --project tsconfig.json",
+    "release": "bun run build && bun publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "0.0.1"
+}
